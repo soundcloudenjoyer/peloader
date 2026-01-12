@@ -5,13 +5,13 @@
 #include <iomanip>
 #include <iostream>
 
-typedef struct _SIGNATURE {
-	DWORD signature;
-} SIGNATURE;
+//typedef struct _SIGNATURE {
+//	DWORD signature;
+//} SIGNATURE;
 
 #define DOS_HEADER_SIZE sizeof(IMAGE_DOS_HEADER)
 #define FILE_HEADER_SIZE sizeof(IMAGE_FILE_HEADER)
-#define SIGNATURE_SIZE sizeof(SIGNATURE)
+#define SIGNATURE_SIZE sizeof(DWORD)
 #define SECTION_HEADER_SIZE sizeof(IMAGE_SECTION_HEADER)
 
 #ifdef _WIN64 
@@ -22,9 +22,9 @@ typedef IMAGE_OPTIONAL_HEADER32 IMAGE_OPT_HEADER;
 #define OPT_HEADER_SIZE sizeof(IMAGE_OPTIONAL_HEADER32)
 #endif
 
-BOOL readPE(FILE* inF, IMAGE_DOS_HEADER* outMZ, SIGNATURE* sig, IMAGE_FILE_HEADER* outFL, IMAGE_OPT_HEADER* outOPT, IMAGE_SECTION_HEADER** outSEC) {
+BOOL readPE(FILE* inF, IMAGE_DOS_HEADER* outMZ, DWORD* sig, IMAGE_FILE_HEADER* outFL, IMAGE_OPT_HEADER* outOPT, IMAGE_SECTION_HEADER** outSEC) {
 	IMAGE_DOS_HEADER MZh;
-	SIGNATURE SG;
+	DWORD SG;
 	IMAGE_FILE_HEADER FLh;
 	IMAGE_OPT_HEADER OPh;
 	IMAGE_SECTION_HEADER *SCh;
@@ -37,11 +37,11 @@ BOOL readPE(FILE* inF, IMAGE_DOS_HEADER* outMZ, SIGNATURE* sig, IMAGE_FILE_HEADE
 	
 	fread(&MZh, DOS_HEADER_SIZE, 1, inF);
 	if (MZh.e_magic != 0x5a4d) { printf("It isn't a PE-file\n");  return FALSE; }
-	if (fileSize < (MZh.e_lfanew + SIGNATURE_SIZE + FILE_HEADER_SIZE)) { printf("File is too small or corrupted\n");  return FALSE; }
+	if (fileSize < (MZh.e_lfanew + SIGNATURE_SIZE + FILE_HEADER_SIZE + OPT_HEADER_SIZE)) { printf("File is too small or corrupted\n");  return FALSE; }
 
 	fseek(inF,MZh.e_lfanew, SEEK_SET);
 	fread(&SG, SIGNATURE_SIZE, 1, inF);
-	if (SG.signature != 0x4550) { printf("Siganture is broken\n"); SG.signature = 0x4550; }
+	if (SG != 0x4550) { printf("Siganture is broken\n"); SG = 0x4550; }
 	fread(&FLh, FILE_HEADER_SIZE, 1, inF);
 
 	printf("Section count: %d", FLh.NumberOfSections); printf("\nOptional Header Size: %d \n", (int)FLh.SizeOfOptionalHeader);
@@ -53,6 +53,7 @@ BOOL readPE(FILE* inF, IMAGE_DOS_HEADER* outMZ, SIGNATURE* sig, IMAGE_FILE_HEADE
 	printf("Import address table address = %X\n", OPh.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress);
 	printf("Import address table address size = %d\n", OPh.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].Size);
 	
+	if (fileSize < (ftell(inF) + SECTION_HEADER_SIZE * (FLh.NumberOfSections))) { printf("File is too small (Sections)\n");  return FALSE; }
 	SCh = (IMAGE_SECTION_HEADER*)malloc(SECTION_HEADER_SIZE * (FLh.NumberOfSections));
 	fread(SCh,(SECTION_HEADER_SIZE * (FLh.NumberOfSections)), 1, inF);
 	
@@ -64,36 +65,6 @@ BOOL readPE(FILE* inF, IMAGE_DOS_HEADER* outMZ, SIGNATURE* sig, IMAGE_FILE_HEADE
 
 	return TRUE;
 }
-
-/*int calcTotalSizeImage(IMAGE_DOS_HEADER* inMZ, SIGNATURE* inSig, IMAGE_FILE_HEADER* inFile, IMAGE_OPT_HEADER* inOpt, IMAGE_SECTION_HEADER* inSec) {
-	int result = 0;
-	int v, i;
-	int alignment = inOpt->SectionAlignment;
-
-	if ((inOpt->SizeOfHeaders % alignment) == 0) {
-		result += inOpt->SizeOfHeaders;
-	}
-	else 
-	{
-		v = (inOpt->SizeOfHeaders / alignment);
-		v++;
-		result += (v * alignment);
-	}
-
-	for (i = 0; i < inFile->NumberOfSections; i++) {
-		if (inSec[i].Misc.VirtualSize) {
-			if (inSec[i].Misc.VirtualSize % alignment == 0) {
-				result += inSec[i].Misc.VirtualSize;
-			}
-			else {
-				v = (inSec[i].Misc.VirtualSize / alignment);
-				v++;
-				result += (v * alignment);
-			}
-		}
-	}
-	return result;
-}*/
 unsigned long getAlignedSize(unsigned long sizeofheaders, unsigned long sectionalignment) {
 	if (sizeofheaders % sectionalignment == 0) {
 		return sizeofheaders;
@@ -106,7 +77,7 @@ unsigned long getAlignedSize(unsigned long sizeofheaders, unsigned long sectiona
 }
 
 BOOL loadPE(FILE *fp, IMAGE_DOS_HEADER* in_MZHeader, 
-	SIGNATURE* in_Signature, IMAGE_FILE_HEADER* in_FILEHeader, 
+	DWORD* in_Signature, IMAGE_FILE_HEADER* in_FILEHeader, 
 	IMAGE_OPT_HEADER* in_OPTHeader, 
 	IMAGE_SECTION_HEADER* in_SCHeader, LPVOID ImageBase) 
 {
@@ -133,34 +104,68 @@ BOOL loadPE(FILE *fp, IMAGE_DOS_HEADER* in_MZHeader,
 		BYTE* dest = (BYTE*)ImageBase + in_SCHeader[i].VirtualAddress;
 		if (in_SCHeader[i].SizeOfRawData > 0) {
 			unsigned long toRead = in_SCHeader[i].SizeOfRawData;
-			if (in_SCHeader[i].SizeOfRawData > in_SCHeader[i].Misc.VirtualSize) {
-				toRead = in_SCHeader[i].Misc.VirtualSize;
+			//if (in_SCHeader[i].SizeOfRawData > in_SCHeader[i].Misc.VirtualSize) {
+				//toRead = in_SCHeader[i].Misc.VirtualSize;
+			//	fseek(fp, in_SCHeader[i].PointerToRawData, SEEK_SET);
+			//	readSize = fread(dest, 1, toRead, fp);
+
+				//if (readSize != toRead) { printf("Error reading section\n"); return FALSE; }
+				
+			//}
+			//else 
+		//	{
 				fseek(fp, in_SCHeader[i].PointerToRawData, SEEK_SET);
 				readSize = fread(dest, 1, toRead, fp);
-
 				if (readSize != toRead) { printf("Error reading section\n"); return FALSE; }
-				//ByteImageBase += getAlignedSize(in_SCHeader[i].Misc.VirtualSize, in_OPTHeader->SectionAlignment);
-			}
-			else 
-			{
-				fseek(fp, in_SCHeader[i].PointerToRawData, SEEK_SET);
-				readSize = fread(dest, 1, toRead, fp);
-				if (readSize != toRead) { printf("Error reading section\n"); return FALSE; }
-				memset(dest + in_SCHeader[i].SizeOfRawData, 0, in_SCHeader[i].Misc.VirtualSize - in_SCHeader[i].SizeOfRawData);
-
-				//ByteImageBase += getAlignedSize(in_SCHeader[i].Misc.VirtualSize, in_OPTHeader->SectionAlignment);
-			}
+				if (in_SCHeader[i].Misc.VirtualSize > in_SCHeader[i].SizeOfRawData) {
+					memset(dest + in_SCHeader[i].SizeOfRawData, 0, in_SCHeader[i].Misc.VirtualSize - in_SCHeader[i].SizeOfRawData);
+				}
+			//}
 		}
 		else {
 			if (in_SCHeader[i].Misc.VirtualSize) 
 			{
 				memset(dest, 0, in_SCHeader[i].Misc.VirtualSize);
-				//ByteImageBase += getAlignedSize(in_SCHeader[i].Misc.VirtualSize, in_OPTHeader->SectionAlignment);
 			}
 		}
 	} 
 
+	return TRUE;
+}
+BOOL doImports(IMAGE_OPT_HEADER* inOPT, LPVOID ImageBase) {
+	IMAGE_DATA_DIRECTORY ImportDIR = inOPT->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+	if (ImportDIR.Size == 0) { return TRUE; }
 
+	IMAGE_IMPORT_DESCRIPTOR* importdesc = (IMAGE_IMPORT_DESCRIPTOR*)((BYTE*)ImageBase + ImportDIR.VirtualAddress);
+	for (; importdesc->Name != 0; ++importdesc) {
+		CHAR* dllname = (CHAR*)((BYTE*)ImageBase + importdesc->Name);
+		HMODULE hMod = NULL;
+
+		hMod = GetModuleHandleA(dllname);
+		if (!hMod) { hMod = LoadLibraryA(dllname); }
+		if (!hMod) { printf("Library %s wasn't loaded\n", dllname); return FALSE; }
+		IMAGE_THUNK_DATA* ilt = (IMAGE_THUNK_DATA*)((BYTE*)ImageBase + importdesc->OriginalFirstThunk);
+		IMAGE_THUNK_DATA* iat = (IMAGE_THUNK_DATA*)((BYTE*)ImageBase + importdesc->FirstThunk);
+
+		if (importdesc->OriginalFirstThunk == 0) { ilt = iat; };
+
+		for (; ilt->u1.AddressOfData != 0; ilt++, iat++) {
+			FARPROC fn;
+			if (ilt->u1.Ordinal & IMAGE_ORDINAL_FLAG) {
+				WORD ord = (WORD)(ilt->u1.Ordinal & 0xFFFF);
+				fn = GetProcAddress(hMod, (LPCSTR)ord);
+				if (fn == NULL) { printf("GetProcAdress() for ordinal %d failed\n", ord); return FALSE; }
+				iat->u1.Function = (ULONGLONG)fn;
+			} else 
+			{
+				IMAGE_IMPORT_BY_NAME* ibn = (IMAGE_IMPORT_BY_NAME*)((BYTE*)ImageBase + ilt->u1.AddressOfData);
+				CHAR* funcName = (CHAR*)ibn->Name;
+				fn = GetProcAddress(hMod, funcName);
+				if (fn == NULL) { printf("GetProcAdress(%s) failed\n", funcName); return FALSE; }
+				iat->u1.Function = (ULONGLONG)fn;
+			}
+		}
+	}
 	return TRUE;
 }
 
@@ -169,7 +174,7 @@ int main() {
 	int argc = 0;
 	FILE *fp;
 	IMAGE_DOS_HEADER MZ_Header;
-	SIGNATURE Signature;
+	DWORD Signature;
 	IMAGE_FILE_HEADER FL_Header;
 	IMAGE_OPT_HEADER OPT_Header;
 	IMAGE_SECTION_HEADER *SC_Header;
@@ -193,7 +198,10 @@ int main() {
 				if (ImageBase) {
 					printf("Image Base address = %p\n", ImageBase);
 					if (loadPE(fp, &MZ_Header, &Signature, &FL_Header, &OPT_Header, SC_Header, ImageBase)) {
-
+						printf("LoadPE successful\n");
+						if (doImports(&OPT_Header, ImageBase)) {
+							printf("doImports succeeded!\n");
+						}
 					}
 					else {
 						printf("LoadPE failed\n");
@@ -205,5 +213,5 @@ int main() {
 		else { printf("File doesn't open\n"); return 1; }
 	} else { printf("Not enough args\n"); return 1; }
 
-	printf("Success!");
+	printf("Success!\n");
 }

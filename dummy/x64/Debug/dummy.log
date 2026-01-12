@@ -1,5 +1,12 @@
 ﻿  main.cpp
+D:\!! MSVC Projects\dummy\main.cpp(195,12): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'SIZE_T'
+      D:\!! MSVC Projects\dummy\main.cpp(195,12):
+      consider using '%lld' in the format string
+      D:\!! MSVC Projects\dummy\main.cpp(195,12):
+      consider using '%Id' in the format string
+      D:\!! MSVC Projects\dummy\main.cpp(195,12):
+      consider using '%I64d' in the format string
+  
   dummy.vcxproj -> D:\!! MSVC Projects\dummy\x64\Debug\dummy.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.
-D:\!! MSVC Projects\dummy\main.cpp(57): warning C6387: 'SCh' could be '0':  this does not adhere to the specification for the function 'fread'. .
