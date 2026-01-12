@@ -5,10 +5,6 @@
 #include <iomanip>
 #include <iostream>
 
-//typedef struct _SIGNATURE {
-//	DWORD signature;
-//} SIGNATURE;
-
 #define DOS_HEADER_SIZE sizeof(IMAGE_DOS_HEADER)
 #define FILE_HEADER_SIZE sizeof(IMAGE_FILE_HEADER)
 #define SIGNATURE_SIZE sizeof(DWORD)
@@ -35,19 +31,19 @@ BOOL readPE(FILE* inF, IMAGE_DOS_HEADER* outMZ, DWORD* sig, IMAGE_FILE_HEADER* o
 	if (fileSize < DOS_HEADER_SIZE) { printf("Binary size is smaller than MZ_Header\n"); return FALSE; }
 
 	
-	fread(&MZh, DOS_HEADER_SIZE, 1, inF);
+	if (fread(&MZh, DOS_HEADER_SIZE, 1, inF) != 1) {printf("DOS Header wasn't read\n"); return FALSE;}
 	if (MZh.e_magic != 0x5a4d) { printf("It isn't a PE-file\n");  return FALSE; }
 	if (fileSize < (MZh.e_lfanew + SIGNATURE_SIZE + FILE_HEADER_SIZE + OPT_HEADER_SIZE)) { printf("File is too small or corrupted\n");  return FALSE; }
 
 	fseek(inF,MZh.e_lfanew, SEEK_SET);
-	fread(&SG, SIGNATURE_SIZE, 1, inF);
+	if (fread(&SG, SIGNATURE_SIZE, 1, inF) != 1) {printf("Signature wasn't read\n"); return FALSE;}
 	if (SG != 0x4550) { printf("Siganture is broken\n"); SG = 0x4550; }
-	fread(&FLh, FILE_HEADER_SIZE, 1, inF);
+	if (fread(&FLh, FILE_HEADER_SIZE, 1, inF) != 1) {printf("File Header wasn't read\n"); return FALSE;}
 
 	printf("Section count: %d", FLh.NumberOfSections); printf("\nOptional Header Size: %d \n", (int)FLh.SizeOfOptionalHeader);
 	if (FLh.SizeOfOptionalHeader != OPT_HEADER_SIZE) { printf("Optional Header size is wrong\n");  return FALSE; }
 
-	fread(&OPh, OPT_HEADER_SIZE, 1, inF);
+	if (fread(&OPh, OPT_HEADER_SIZE, 1, inF) != 1) {printf("Optional Header wasn't read\n"); return FALSE;} 
 	printf("Import table address = %X\n", OPh.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
 	printf("Import table size = %d\n", OPh.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size);
 	printf("Import address table address = %X\n", OPh.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress);
@@ -55,7 +51,7 @@ BOOL readPE(FILE* inF, IMAGE_DOS_HEADER* outMZ, DWORD* sig, IMAGE_FILE_HEADER* o
 	
 	if (fileSize < (ftell(inF) + SECTION_HEADER_SIZE * (FLh.NumberOfSections))) { printf("File is too small (Sections)\n");  return FALSE; }
 	SCh = (IMAGE_SECTION_HEADER*)malloc(SECTION_HEADER_SIZE * (FLh.NumberOfSections));
-	fread(SCh,(SECTION_HEADER_SIZE * (FLh.NumberOfSections)), 1, inF);
+	if (fread(SCh,(SECTION_HEADER_SIZE * (FLh.NumberOfSections)), 1, inF) != 1) {printf("Sections weren't read\n"); return FALSE};
 	
 	*outMZ = MZh;
 	*outFL = FLh;
@@ -64,16 +60,6 @@ BOOL readPE(FILE* inF, IMAGE_DOS_HEADER* outMZ, DWORD* sig, IMAGE_FILE_HEADER* o
  	*outSEC = SCh;
 
 	return TRUE;
-}
-unsigned long getAlignedSize(unsigned long sizeofheaders, unsigned long sectionalignment) {
-	if (sizeofheaders % sectionalignment == 0) {
-		return sizeofheaders;
-	}
-	else {
-		int v = (sizeofheaders / sectionalignment);
-		v++;
-		return (v * sectionalignment);
-	}
 }
 
 BOOL loadPE(FILE *fp, IMAGE_DOS_HEADER* in_MZHeader, 
@@ -85,7 +71,7 @@ BOOL loadPE(FILE *fp, IMAGE_DOS_HEADER* in_MZHeader,
 	unsigned long sizeofheaders = in_OPTHeader->SizeOfHeaders;
 	size_t readSize;
 	int i;
-	BYTE* ByteImageBase = (BYTE*)ImageBase;
+
 	fseek(fp, 0, SEEK_SET);
 
 	for (i = 0; i < in_FILEHeader->NumberOfSections; ++i) {
@@ -94,33 +80,22 @@ BOOL loadPE(FILE *fp, IMAGE_DOS_HEADER* in_MZHeader,
 		}
 	}
 
-	readSize = fread(ByteImageBase, 1, sizeofheaders , fp);
+	readSize = fread(ImageBase, 1, sizeofheaders , fp);
 	printf("Header Size = %d\n", sizeofheaders);
 	if (readSize != sizeofheaders) { printf("readSize != sizeofheaders\n"); return FALSE; }
 	printf("Reading headers successful!\n");
 
-	ByteImageBase += getAlignedSize(in_OPTHeader->SizeOfHeaders, in_OPTHeader->SectionAlignment);
+
 	for (i = 0; i < in_FILEHeader->NumberOfSections; ++i) {
 		BYTE* dest = (BYTE*)ImageBase + in_SCHeader[i].VirtualAddress;
 		if (in_SCHeader[i].SizeOfRawData > 0) {
 			unsigned long toRead = in_SCHeader[i].SizeOfRawData;
-			//if (in_SCHeader[i].SizeOfRawData > in_SCHeader[i].Misc.VirtualSize) {
-				//toRead = in_SCHeader[i].Misc.VirtualSize;
-			//	fseek(fp, in_SCHeader[i].PointerToRawData, SEEK_SET);
-			//	readSize = fread(dest, 1, toRead, fp);
-
-				//if (readSize != toRead) { printf("Error reading section\n"); return FALSE; }
-				
-			//}
-			//else 
-		//	{
-				fseek(fp, in_SCHeader[i].PointerToRawData, SEEK_SET);
-				readSize = fread(dest, 1, toRead, fp);
-				if (readSize != toRead) { printf("Error reading section\n"); return FALSE; }
-				if (in_SCHeader[i].Misc.VirtualSize > in_SCHeader[i].SizeOfRawData) {
-					memset(dest + in_SCHeader[i].SizeOfRawData, 0, in_SCHeader[i].Misc.VirtualSize - in_SCHeader[i].SizeOfRawData);
-				}
-			//}
+			fseek(fp, in_SCHeader[i].PointerToRawData, SEEK_SET);
+			readSize = fread(dest, 1, toRead, fp);
+			if (readSize != toRead) { printf("Error reading section\n"); return FALSE; }
+			if (in_SCHeader[i].Misc.VirtualSize > in_SCHeader[i].SizeOfRawData) {
+				memset(dest + in_SCHeader[i].SizeOfRawData, 0, in_SCHeader[i].Misc.VirtualSize - in_SCHeader[i].SizeOfRawData);
+			}
 		}
 		else {
 			if (in_SCHeader[i].Misc.VirtualSize) 
@@ -169,6 +144,41 @@ BOOL doImports(IMAGE_OPT_HEADER* inOPT, LPVOID ImageBase) {
 	return TRUE;
 }
 
+BOOL doRelocs(IMAGE_OPT_HEADER *inOpt, LPVOID ImageBase) {
+
+	if (inOpt->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size == 0) return TRUE;
+	BYTE *relocStart = (BYTE*)ImageBase + inOpt->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress;
+	BYTE *relocEnd = relocStart + inOpt->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size;  
+	ULONGLONG delta = (ULONGLONG)((BYTE*)ImageBase - inOpt->ImageBase);
+	if (delta == 0) { 
+	printf("ImageBase is correct\n");
+	return TRUE;}
+
+	while (relocStart < relocEnd) {
+		IMAGE_BASE_RELOCATION* block = (IMAGE_BASE_RELOCATION*)relocStart;
+		DWORD base = block->VirtualAddress;
+		DWORD size = block->SizeOfBlock;
+		if (size == 0) {break;} 
+		if (size < sizeof(IMAGE_BASE_RELOCATION)) {printf("Inval SizeOfBlock\n"); return FALSE;}
+		WORD *entries = (WORD*)(block + 1);
+
+		DWORD count = ((size - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD));
+		for (DWORD i = 0; i < count; ++i) {
+			WORD type = entries[i] >> 12;
+			WORD offset = entries[i] & 0x0FFF;
+
+			BYTE* addresstopatch = (BYTE*)ImageBase + base + offset;
+
+			if (type == IMAGE_REL_BASED_ABSOLUTE) continue;
+			else if (type == IMAGE_REL_BASED_HIGHLOW) *(DWORD*)addresstopatch += delta;
+			else if (type == IMAGE_REL_BASED_DIR64) *(ULONGLONG*)addresstopatch += delta;
+			else { printf("doRelocs failed, type is unknown\n"); return FALSE;}
+		}
+		relocStart = (BYTE*)block + block->SizeOfBlock;
+	}
+	return TRUE;
+}
+
 int main() {
 	setlocale(LC_ALL, "");
 	int argc = 0;
@@ -201,17 +211,20 @@ int main() {
 						printf("LoadPE successful\n");
 						if (doImports(&OPT_Header, ImageBase)) {
 							printf("doImports succeeded!\n");
-						}
+							if (doRelocs(&OPT_Header, ImageBase)) {
+								printf("Relocation patch is successful!\n"); 
+							} else {printf("Relocs patch is failed\n");}
+						} else {printf("Imports failed\n");}
 					}
-					else {
-						printf("LoadPE failed\n");
-					}
+					else {printf("LoadPE failed\n");}
 				}
 				else { printf("Allocation failed\n"); return 1; }
 			}
 		}
 		else { printf("File doesn't open\n"); return 1; }
-	} else { printf("Not enough args\n"); return 1; }
+		fclose(fp);
+	} 
+	else { printf("Not enough args\n"); return 1; }
 
 	printf("Success!\n");
 }
