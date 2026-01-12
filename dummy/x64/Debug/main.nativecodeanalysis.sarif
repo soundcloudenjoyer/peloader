@@ -1,0 +1,473 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "ruleId": "C6387",
+          "message": {
+            "text": "'SCh' could be '0':  this does not adhere to the specification for the function 'fread'. ."
+          },
+          "analysisTarget": {
+            "uri": "file:///d:/!! msvc projects/dummy/main.cpp"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                },
+                "region": {
+                  "startLine": 57,
+                  "startColumn": 2,
+                  "endLine": 57,
+                  "endColumn": 63
+                }
+              },
+              "logicalLocations": [
+                {
+                  "fullyQualifiedName": "readPE",
+                  "decoratedName": "?readPE@@YAHPEAU_iobuf@@PEAU_IMAGE_DOS_HEADER@@PEAU_SIGNATURE@@PEAU_IMAGE_FILE_HEADER@@PEAU_IMAGE_OPTIONAL_HEADER64@@PEAPEAU_IMAGE_SECTION_HEADER@@@Z",
+                  "kind": "function"
+                }
+              ]
+            }
+          ],
+          "codeFlows": [
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 26,
+                            "startColumn": 19
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 27,
+                            "startColumn": 12
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 28,
+                            "startColumn": 20
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 29,
+                            "startColumn": 19
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 30,
+                            "startColumn": 24
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 32,
+                            "startColumn": 7
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 33,
+                            "startColumn": 7
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 34,
+                            "startColumn": 7
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 35,
+                            "startColumn": 15
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 38,
+                            "startColumn": 7
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 39,
+                            "startColumn": 18
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 40,
+                            "startColumn": 15
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 42,
+                            "startColumn": 7
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 43,
+                            "startColumn": 7
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 44,
+                            "startColumn": 19
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 45,
+                            "startColumn": 7
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 47,
+                            "startColumn": 8
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 47,
+                            "startColumn": 59
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 48,
+                            "startColumn": 31
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 50,
+                            "startColumn": 7
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 51,
+                            "startColumn": 8
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 52,
+                            "startColumn": 8
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 53,
+                            "startColumn": 8
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 54,
+                            "startColumn": 8
+                          }
+                        }
+                      },
+                      "importance": "unimportant"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 56,
+                            "startColumn": 6
+                          }
+                        },
+                        "message": {
+                          "text": "'SCh' may be NULL"
+                        }
+                      },
+                      "kinds": [
+                        "declaration"
+                      ],
+                      "importance": "essential"
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 57,
+                            "startColumn": 7
+                          }
+                        },
+                        "message": {
+                          "text": "'SCh' is an In/Out argument to 'fread' (declared at c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\ucrt\\stdio.h:239)"
+                        }
+                      },
+                      "kinds": [
+                        "declaration"
+                      ]
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "file:///D:/!! MSVC Projects/dummy/main.cpp"
+                          },
+                          "region": {
+                            "startLine": 57,
+                            "startColumn": 7
+                          }
+                        },
+                        "message": {
+                          "text": "'SCh' should not be NULL, because this is not consistent with the SAL annotation on 'fread'"
+                        }
+                      },
+                      "kinds": [
+                        "usage"
+                      ],
+                      "importance": "essential"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "PREfast",
+          "fullName": "MSVC Code Analysis",
+          "version": "14.50.35721.0",
+          "informationUri": "https://aka.ms/cpp/ca"
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///d:/!! msvc projects/dummy/main.cpp"
+          },
+          "roles": [
+            "analysisTarget",
+            "resultFile"
+          ],
+          "hashes": {
+            "sha-256": "244d85096e4567db04085ce8c8857b94424056467cba751277b12fcd9d10d460"
+          }
+        }
+      ]
+    }
+  ]
+}

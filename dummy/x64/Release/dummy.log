@@ -1,0 +1,12 @@
+﻿  main.cpp
+D:\!! MSVC Projects\dummy\main.cpp(19,12): warning C4477: 'wprintf' : format string '%lc' requires an argument of type 'unsigned int', but variadic argument 1 has type 'WCHAR *'
+D:\!! MSVC Projects\dummy\main.cpp(19,12): warning C4313: 'wprintf': '%c' in format string conflicts with argument 1 of type 'WCHAR *'
+D:\!! MSVC Projects\dummy\main.cpp(11,8): warning C4101: 'fl': unreferenced local variable
+  Generating code
+  3 of 6 functions (50.0%) were compiled, the rest were copied from previous compilation.
+    2 functions were new in current compilation
+    1 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  dummy.vcxproj -> D:\!! MSVC Projects\dummy\x64\Release\dummy.exe
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.

@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?><DEFECTS><DEFECT>
+    <SFA>
+      <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+      <FILENAME>main.cpp</FILENAME>
+      <LINE>57</LINE>
+      <COLUMN>6</COLUMN>
+    </SFA>
+    <DEFECTCODE>6387</DEFECTCODE>
+    <DESCRIPTION>'SCh' could be '0':  this does not adhere to the specification for the function 'fread'. .</DESCRIPTION>
+    <FUNCTION>readPE</FUNCTION>
+    <DECORATED>?readPE@@YAHPEAU_iobuf@@PEAU_IMAGE_DOS_HEADER@@PEAU_SIGNATURE@@PEAU_IMAGE_FILE_HEADER@@PEAU_IMAGE_OPTIONAL_HEADER64@@PEAPEAU_IMAGE_SECTION_HEADER@@@Z</DECORATED>
+    <FUNCLINE>25</FUNCLINE>
+    <PROBABILITY>1</PROBABILITY>
+    <RANK>4</RANK>
+    <CATEGORY>
+      <RULECATEGORY>mspft</RULECATEGORY>
+    </CATEGORY>
+    <PATH>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>26</LINE>
+        <COLUMN>18</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>27</LINE>
+        <COLUMN>11</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>28</LINE>
+        <COLUMN>19</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>29</LINE>
+        <COLUMN>18</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>30</LINE>
+        <COLUMN>23</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>32</LINE>
+        <COLUMN>6</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>33</LINE>
+        <COLUMN>6</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>34</LINE>
+        <COLUMN>6</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>35</LINE>
+        <COLUMN>14</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>38</LINE>
+        <COLUMN>6</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>39</LINE>
+        <COLUMN>17</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>40</LINE>
+        <COLUMN>14</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>42</LINE>
+        <COLUMN>6</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>43</LINE>
+        <COLUMN>6</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>44</LINE>
+        <COLUMN>18</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>45</LINE>
+        <COLUMN>6</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>47</LINE>
+        <COLUMN>7</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>47</LINE>
+        <COLUMN>58</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>48</LINE>
+        <COLUMN>30</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>50</LINE>
+        <COLUMN>6</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>51</LINE>
+        <COLUMN>7</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>52</LINE>
+        <COLUMN>7</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>53</LINE>
+        <COLUMN>7</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>54</LINE>
+        <COLUMN>7</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>56</LINE>
+        <COLUMN>5</COLUMN>
+        <KEYEVENT>
+          <ID>1</ID>
+          <KIND>declaration</KIND>
+          <IMPORTANCE>Essential</IMPORTANCE>
+          <MESSAGE>'SCh' may be NULL</MESSAGE>
+        </KEYEVENT>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>57</LINE>
+        <COLUMN>6</COLUMN>
+        <KEYEVENT>
+          <ID>2</ID>
+          <KIND>declaration</KIND>
+          <IMPORTANCE>Full</IMPORTANCE>
+          <MESSAGE>'SCh' is an In/Out argument to 'fread' (declared at c:\program files (x86)\windows kits\10\include\10.0.26100.0\ucrt\stdio.h:239)</MESSAGE>
+        </KEYEVENT>
+      </SFA>
+      <SFA>
+        <FILEPATH>D:\!! MSVC Projects\dummy\</FILEPATH>
+        <FILENAME>main.cpp</FILENAME>
+        <LINE>57</LINE>
+        <COLUMN>6</COLUMN>
+        <KEYEVENT>
+          <ID>3</ID>
+          <KIND>usage</KIND>
+          <IMPORTANCE>Essential</IMPORTANCE>
+          <MESSAGE>'SCh' should not be NULL, because this is not consistent with the SAL annotation on 'fread'</MESSAGE>
+        </KEYEVENT>
+      </SFA>
+    </PATH>
+  </DEFECT></DEFECTS>

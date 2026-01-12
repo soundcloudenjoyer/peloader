@@ -1,0 +1,5 @@
+﻿  main.cpp
+  dummy.vcxproj -> D:\!! MSVC Projects\dummy\x64\Debug\dummy.exe
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.
+D:\!! MSVC Projects\dummy\main.cpp(57): warning C6387: 'SCh' could be '0':  this does not adhere to the specification for the function 'fread'. .

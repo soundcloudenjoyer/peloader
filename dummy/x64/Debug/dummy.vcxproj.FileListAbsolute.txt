@@ -1,0 +1,2 @@
+D:\!! MSVC Projects\dummy\x64\Debug\dummy.exe.lastcodeanalysissucceeded
+D:\!! MSVC Projects\dummy\dummy\x64\Debug\NativeCodeAnalysis.read.1.tlog
