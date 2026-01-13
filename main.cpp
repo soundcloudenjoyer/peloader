@@ -1,9 +1,7 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <string.h>
-#include <locale.h>
-#include <iomanip>
-#include <iostream>
+
 
 #define DOS_HEADER_SIZE sizeof(IMAGE_DOS_HEADER)
 #define FILE_HEADER_SIZE sizeof(IMAGE_FILE_HEADER)
@@ -17,6 +15,7 @@ typedef IMAGE_OPTIONAL_HEADER64 IMAGE_OPT_HEADER;
 typedef IMAGE_OPTIONAL_HEADER32 IMAGE_OPT_HEADER;
 #define OPT_HEADER_SIZE sizeof(IMAGE_OPTIONAL_HEADER32)
 #endif
+using EntryFn = void(*)();
 
 BOOL readPE(FILE* inF, IMAGE_DOS_HEADER* outMZ, DWORD* sig, IMAGE_FILE_HEADER* outFL, IMAGE_OPT_HEADER* outOPT, IMAGE_SECTION_HEADER** outSEC) {
 	IMAGE_DOS_HEADER MZh;
@@ -51,7 +50,7 @@ BOOL readPE(FILE* inF, IMAGE_DOS_HEADER* outMZ, DWORD* sig, IMAGE_FILE_HEADER* o
 	
 	if (fileSize < (ftell(inF) + SECTION_HEADER_SIZE * (FLh.NumberOfSections))) { printf("File is too small (Sections)\n");  return FALSE; }
 	SCh = (IMAGE_SECTION_HEADER*)malloc(SECTION_HEADER_SIZE * (FLh.NumberOfSections));
-	if (fread(SCh,(SECTION_HEADER_SIZE * (FLh.NumberOfSections)), 1, inF) != 1) {printf("Sections weren't read\n"); return FALSE};
+	if (fread(SCh,(SECTION_HEADER_SIZE * (FLh.NumberOfSections)), 1, inF) != 1) {printf("Sections weren't read\n"); return FALSE;}
 	
 	*outMZ = MZh;
 	*outFL = FLh;
@@ -179,8 +178,34 @@ BOOL doRelocs(IMAGE_OPT_HEADER *inOpt, LPVOID ImageBase) {
 	return TRUE;
 }
 
+DWORD characteristicsToProtect(DWORD ch) {
+    bool r = ch & IMAGE_SCN_MEM_READ;
+    bool w = ch & IMAGE_SCN_MEM_WRITE;
+    bool x = ch & IMAGE_SCN_MEM_EXECUTE;
+
+    if (x) {
+        if (w) return PAGE_EXECUTE_READWRITE;
+        if (r) return PAGE_EXECUTE_READ;
+        return PAGE_EXECUTE;
+    } else {
+        if (w) return PAGE_READWRITE;
+        if (r) return PAGE_READONLY;
+        return PAGE_NOACCESS;
+    }
+}
+
+BOOL changeProtection(IMAGE_SECTION_HEADER* sec, LPVOID ImageBase) {
+	DWORD oldprotect;
+	LPVOID secBase = (BYTE*)ImageBase + sec->VirtualAddress;
+	SIZE_T size = sec->Misc.VirtualSize;
+
+	if (size == 0) return TRUE;
+	DWORD prot = characteristicsToProtect(sec->Characteristics);
+
+	return VirtualProtect(secBase, size, prot, &oldprotect);
+}
+
 int main() {
-	setlocale(LC_ALL, "");
 	int argc = 0;
 	FILE *fp;
 	IMAGE_DOS_HEADER MZ_Header;
@@ -213,6 +238,10 @@ int main() {
 							printf("doImports succeeded!\n");
 							if (doRelocs(&OPT_Header, ImageBase)) {
 								printf("Relocation patch is successful!\n"); 
+								for (SIZE_T i = 0; i < FL_Header.NumberOfSections; i++) {
+									if (!changeProtection(&SC_Header[i], ImageBase)) {printf("changeProtection for SC_Header[%d] failed!\n", i); return FALSE;}
+								}
+
 							} else {printf("Relocs patch is failed\n");}
 						} else {printf("Imports failed\n");}
 					}
