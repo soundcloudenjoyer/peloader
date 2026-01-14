@@ -11,11 +11,15 @@
 #ifdef _WIN64 
 #define OPT_HEADER_SIZE sizeof(IMAGE_OPTIONAL_HEADER64)		
 typedef IMAGE_OPTIONAL_HEADER64 IMAGE_OPT_HEADER;
+typedef _IMAGE_TLS_DIRECTORY64 TLS_DIRECTORY;
+typedef DWORD(*EntryFn)();
+typedef BOOL(WINAPI* PDllMain)(HINSTANCE, DWORD, LPVOID);
 #else 
 typedef IMAGE_OPTIONAL_HEADER32 IMAGE_OPT_HEADER;
+typedef _IMAGE_TLS_DIRECTORY32 TLS_DIRECTORY;
 #define OPT_HEADER_SIZE sizeof(IMAGE_OPTIONAL_HEADER32)
 #endif
-using EntryFn = void(*)();
+ 
 
 BOOL readPE(FILE* inF, IMAGE_DOS_HEADER* outMZ, DWORD* sig, IMAGE_FILE_HEADER* outFL, IMAGE_OPT_HEADER* outOPT, IMAGE_SECTION_HEADER** outSEC) {
 	IMAGE_DOS_HEADER MZh;
@@ -205,6 +209,20 @@ BOOL changeProtection(IMAGE_SECTION_HEADER* sec, LPVOID ImageBase) {
 	return VirtualProtect(secBase, size, prot, &oldprotect);
 }
 
+BOOL callTLScallbacks(IMAGE_OPT_HEADER *inOh, LPVOID ImageBase, DWORD dwReason) {
+	 if (inOh->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size == 0) {printf("TLS callbacks are empty!\n"); return TRUE;}
+	 TLS_DIRECTORY* tlsDir = (TLS_DIRECTORY*)((BYTE*)ImageBase + inOh->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+
+	 if (tlsDir->AddressOfCallBacks == 0) {printf("AddressOfCallback is 0!\n"); return TRUE;}
+	 PIMAGE_TLS_CALLBACK *callbacks = (PIMAGE_TLS_CALLBACK*)((BYTE*)ImageBase + (tlsDir->AddressOfCallBacks - inOh->ImageBase));
+	 if (callbacks == NULL) {printf("There aren't any callbacks!\n"); return TRUE;}
+	 for (SIZE_T i = 0; callbacks[i]; i++) {
+		callbacks[i](ImageBase, dwReason, NULL);
+		printf("Callback №%d called", i);
+	}
+	return TRUE;
+}
+
 int main() {
 	int argc = 0;
 	FILE *fp;
@@ -233,7 +251,7 @@ int main() {
 				if (ImageBase) {
 					printf("Image Base address = %p\n", ImageBase);
 					if (loadPE(fp, &MZ_Header, &Signature, &FL_Header, &OPT_Header, SC_Header, ImageBase)) {
-						printf("LoadPE successful\n");
+						printf("LoadPE successful!\n");
 						if (doImports(&OPT_Header, ImageBase)) {
 							printf("doImports succeeded!\n");
 							if (doRelocs(&OPT_Header, ImageBase)) {
@@ -241,19 +259,23 @@ int main() {
 								for (SIZE_T i = 0; i < FL_Header.NumberOfSections; i++) {
 									if (!changeProtection(&SC_Header[i], ImageBase)) {printf("changeProtection for SC_Header[%d] failed!\n", i); return FALSE;}
 								}
-
-							} else {printf("Relocs patch is failed\n");}
-						} else {printf("Imports failed\n");}
+								if (callTLScallbacks(&OPT_Header, ImageBase, DLL_PROCESS_ATTACH)) 
+								{
+									
+								}
+								else {printf("TLS Callbacks failed!\n"); return FALSE;}
+							} else {printf("Relocs patch is failed!\n");}
+						} else {printf("Imports failed!\n");}
 					}
-					else {printf("LoadPE failed\n");}
+					else {printf("LoadPE failed!\n");}
 				}
-				else { printf("Allocation failed\n"); return 1; }
+				else { printf("Allocation failed!\n"); return 1; }
 			}
 		}
-		else { printf("File doesn't open\n"); return 1; }
+		else { printf("File doesn't open!\n"); return 1; }
 		fclose(fp);
 	} 
-	else { printf("Not enough args\n"); return 1; }
+	else { printf("Not enough args!\n"); return 1; }
 
 	printf("Success!\n");
 }
