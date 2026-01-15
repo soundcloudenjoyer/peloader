@@ -13,7 +13,7 @@
 typedef IMAGE_OPTIONAL_HEADER64 IMAGE_OPT_HEADER;
 typedef _IMAGE_TLS_DIRECTORY64 TLS_DIRECTORY;
 typedef DWORD(*EntryFn)();
-typedef BOOL(WINAPI* PDllMain)(HINSTANCE, DWORD, LPVOID);
+typedef BOOL(WINAPI *DLLMain)(HMODULE, DWORD, LPVOID);
 #else 
 typedef IMAGE_OPTIONAL_HEADER32 IMAGE_OPT_HEADER;
 typedef _IMAGE_TLS_DIRECTORY32 TLS_DIRECTORY;
@@ -223,6 +223,38 @@ BOOL callTLScallbacks(IMAGE_OPT_HEADER *inOh, LPVOID ImageBase, DWORD dwReason) 
 	return TRUE;
 }
 
+BOOL callDLL_EntryPoint(IMAGE_OPTIONAL_HEADER *inOh, LPVOID ImageBase) {
+    DLLMain entry = (DLLMain)((BYTE*)ImageBase + inOh->AddressOfEntryPoint);
+    
+    printf("Calling DLL entry at %p...\n", (void*)entry);
+    try {
+        BOOL result = entry((HINSTANCE)ImageBase, DLL_PROCESS_ATTACH, NULL);
+        if (result) {
+            printf("Entry point called successfully!\n");
+            return TRUE;
+        } else {
+            printf("DllMain returned FALSE!\n");
+            return FALSE;
+        }
+    } 
+    catch(...) {
+        printf("Exception while entry point call!\n");
+        return FALSE;
+    }
+}
+BOOL callEXE_EntryPoint(IMAGE_OPT_HEADER *inOh, LPVOID ImageBase) {
+	EntryFn entry = (EntryFn)((BYTE*)ImageBase + inOh->AddressOfEntryPoint);
+	printf("Calling EXE entry at %p...\n", entry);
+	try {
+		entry();
+		printf("Entry point called successfullly!\n");
+		return TRUE;
+	} catch(...) {
+		printf("Exception while entry point call!\n");
+		return FALSE;
+	}
+}
+
 int main() {
 	int argc = 0;
 	FILE *fp;
@@ -261,7 +293,8 @@ int main() {
 								}
 								if (callTLScallbacks(&OPT_Header, ImageBase, DLL_PROCESS_ATTACH)) 
 								{
-									
+									callDLL_EntryPoint(&OPT_Header, ImageBase);
+									//callEXE_EntryPoint(&OPT_Header, ImageBase);
 								}
 								else {printf("TLS Callbacks failed!\n"); return FALSE;}
 							} else {printf("Relocs patch is failed!\n");}
