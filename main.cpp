@@ -262,10 +262,10 @@ int main() {
 	DWORD Signature;
 	IMAGE_FILE_HEADER FL_Header;
 	IMAGE_OPT_HEADER OPT_Header;
-	IMAGE_SECTION_HEADER *SC_Header;
+	IMAGE_SECTION_HEADER *SC_Header = NULL;
 	WCHAR **argv;
 	WCHAR flname[MAX_PATH];
-	LPVOID ImageBase;
+	LPVOID ImageBase = NULL;
 	RtlSecureZeroMemory(flname, MAX_PATH);
 
 	argv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -296,17 +296,17 @@ int main() {
 									callDLL_EntryPoint(&OPT_Header, ImageBase);
 									//callEXE_EntryPoint(&OPT_Header, ImageBase);
 								}
-								else {printf("TLS Callbacks failed!\n"); return FALSE;}
-							} else {printf("Relocs patch is failed!\n");}
-						} else {printf("Imports failed!\n");}
+								else {printf("TLS Callbacks failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE);  return 1;}
+							} else {printf("Relocs patch is failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE); return 1;}
+						} else {printf("Imports failed!\n"); fclose(fp);free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE); return 1;}
 					}
-					else {printf("LoadPE failed!\n");}
+					else {printf("LoadPE failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE); return 1;}
 				}
-				else { printf("Allocation failed!\n"); return 1; }
-			}
+				else { printf("Allocation failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE); return 1; }
+			} else {printf("readPE failed!\n"); fclose(fp); free(SC_Header);  return 1;}
 		}
 		else { printf("File doesn't open!\n"); return 1; }
-		fclose(fp);
+		fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE);
 	} 
 	else { printf("Not enough args!\n"); return 1; }
 
