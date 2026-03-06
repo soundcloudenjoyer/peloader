@@ -176,9 +176,16 @@ BOOL doRelocs(IMAGE_OPT_HEADER *inOpt, LPVOID ImageBase) {
 	return TRUE;}
 
 	while (relocStart < relocEnd) {
+
 		IMAGE_BASE_RELOCATION* block = (IMAGE_BASE_RELOCATION*)relocStart;
 		DWORD base = block->VirtualAddress;
 		DWORD size = block->SizeOfBlock;
+
+		if (base >= SC_Header[0].VirtualAddress && base < SC_Header[0].VirtualAddress + SC_Header[0].Misc.VirtualSize) {
+			printf("skipping .text relocations\n");
+			relocStart += size;
+			continue;
+		}
 		if (size == 0) {break;} 
 		if (size < sizeof(IMAGE_BASE_RELOCATION)) {printf("Invalid SizeOfBlock\n"); return FALSE;}
 		WORD *entries = (WORD*)(block + 1);
@@ -292,45 +299,44 @@ BOOL callEXE_EntryPoint(IMAGE_OPT_HEADER *inOh, LPVOID ImageBase) {
 }
 
 //NEEDS FIX
-BOOL doRelocsForPage(IMAGE_OPT_HEADER *inOpt, LPVOID ImageBase, ULONG_PTR pageStart) {
-	if (inOpt->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size == 0) return TRUE;
-	BYTE *relocStart = (BYTE*)ImageBase + inOpt->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress;
-	BYTE *relocEnd = relocStart + inOpt->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size;  
-	ULONGLONG delta = (ULONGLONG)((BYTE*)ImageBase - inOpt->ImageBase);
-	if (delta == 0) { 
-	printf("ImageBase is correct\n");
-	return TRUE;}
-	DWORD targetPageRVA = (DWORD)(pageStart - (ULONG_PTR)ImageBase);
+BOOL doRelocsForPage(IMAGE_OPT_HEADER* inOpt, LPVOID ImageBase, ULONG_PTR pageStart) {
+    if (inOpt->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size == 0) return TRUE;
 
-	while (relocStart < relocEnd) {
-	IMAGE_BASE_RELOCATION* block = (IMAGE_BASE_RELOCATION*)relocStart;
-	DWORD base = block->VirtualAddress;
-	DWORD size = block->SizeOfBlock;
-	if (size == 0) {break;} 
-	if (size < sizeof(IMAGE_BASE_RELOCATION)) {printf("doRelocsForPage() Invalid SizeOfBlock\n"); return FALSE;}
+    BYTE* relocStart = (BYTE*)ImageBase + inOpt->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress;
+    BYTE* relocEnd = relocStart + inOpt->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size;
+    ULONGLONG delta = (ULONGLONG)((BYTE*)ImageBase - inOpt->ImageBase);
 
-	if (base <= targetPageRVA &&
-    targetPageRVA < base + 0x1000) {
-		WORD *entries = (WORD*)(block + 1);
+    if (delta == 0) return TRUE;
 
-		DWORD count = ((size - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD));
-		for(DWORD i = 0; i < count; ++i) {
-			WORD type = entries[i] >> 12;
-			WORD offset = entries[i] & 0x0FFF;
+    DWORD targetPageRVA = (DWORD)(pageStart - (ULONG_PTR)ImageBase);
 
-			BYTE* addresstopatch = (BYTE*)ImageBase + base + offset;
+    while (relocStart < relocEnd) {
+        IMAGE_BASE_RELOCATION* block = (IMAGE_BASE_RELOCATION*)relocStart;
+        if (block->SizeOfBlock == 0) break;
 
-			if (type == IMAGE_REL_BASED_ABSOLUTE) continue;
-            if (type == IMAGE_REL_BASED_HIGHLOW) {
-                *(DWORD*)addresstopatch += (DWORD)delta;
-            } else if (type == IMAGE_REL_BASED_DIR64) {
-                *(ULONGLONG*)addresstopatch += delta;
+        DWORD base = block->VirtualAddress;
+        WORD* entries = (WORD*)(block + 1);
+        DWORD count = (block->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD);
+
+        for (DWORD i = 0; i < count; ++i) {
+            WORD type = entries[i] >> 12;
+            WORD offset = entries[i] & 0x0FFF;
+            DWORD patchRVA = base + offset;
+
+            if (patchRVA >= targetPageRVA && patchRVA < targetPageRVA + PAGE_SIZE) {
+                BYTE* addresstopatch = (BYTE*)ImageBase + patchRVA;
+
+                if (type == IMAGE_REL_BASED_DIR64) {
+                    *(ULONGLONG*)addresstopatch += delta;
+                }
+                else if (type == IMAGE_REL_BASED_HIGHLOW) {
+                    *(DWORD*)addresstopatch += (DWORD)delta;
+                }
             }
-		}
-	}
-		relocStart = (BYTE*)block + block->SizeOfBlock;
-	}
-	return TRUE;
+        }
+        relocStart += block->SizeOfBlock;
+    }
+    return TRUE;
 }
 //NEEDS FIX
 
@@ -347,19 +353,24 @@ LONG CALLBACK PageFaultHandler(PEXCEPTION_POINTERS ExceptionsInfo) {
 		
 		ULONG_PTR start = (ULONG_PTR)ImageBase + SC_Header[i].VirtualAddress;
 		ULONG_PTR end = start + SC_Header[i].Misc.VirtualSize;
-
+		DWORD old;
 	if (faultAddr >= start && faultAddr < end) {
 		os << std::hex << "Fault found, " << std::setw(16) << std::setfill('0') << faultAddr << '\n'; 
 		//printf("Fault found, %p  \n", faultAddr);
 		ULONG_PTR pageStart = faultAddr & ~0xFFF; 
-		VirtualAlloc((LPVOID)pageStart, PAGE_SIZE, MEM_COMMIT, PAGE_READWRITE);
+		//VirtualAlloc((LPVOID)pageStart, PAGE_SIZE, MEM_COMMIT, PAGE_READWRITE);
 
 		DWORD offset = (DWORD)(pageStart - start);
 		DWORD fileOffset = SC_Header[i].PointerToRawData + offset;
-		
+
+		DWORD rva = faultAddr - (ULONG_PTR)OPT_Header.ImageBase;
+		os << std::hex << "rva of copy data " << std::setw(16) << std::setfill('0') << rva << "\n"; 
+
+		os << std::hex << "file offset here! " << std::setw(16) << std::setfill('0') << fileOffset << "\n";
 		if (fp) {
 		os << std::hex << "Writing data for" << std::setw(16) << std::setfill('0') << faultAddr << "\n";
 		//printf("Writing data for %p\n", faultAddr);
+		VirtualProtect((LPVOID)pageStart, PAGE_SIZE, PAGE_READWRITE, &old);
 		fseek(fp, fileOffset, SEEK_SET);
 		os << std::hex << "FSeek for " << std::setw(16) << std::setfill('0') << faultAddr << "\n";
 		//printf("FSeek for %p\n", faultAddr);
@@ -378,11 +389,10 @@ LONG CALLBACK PageFaultHandler(PEXCEPTION_POINTERS ExceptionsInfo) {
 			//printf("Relocations done for %p!\n", faultAddr);
 		}
 		//APPLY RELOCS FOR PAGE HERE
-		DWORD old;
 		VirtualProtect((LPVOID)pageStart, PAGE_SIZE, PAGE_EXECUTE_READ, &old);
 		os << std::hex << "Virtual Protect is set to PAGE_EXECUTE_READ, retrying for " << std::setw(16) << std::setfill('0') << faultAddr << '\n'; 
 		//printf("Virtual Protect is set to PAGE_EXECUTE_READ, retrying for %p!\n", faultAddr);
-		FlushInstructionCache(GetCurrentProcess(), (LPVOID)pageStart, PAGE_SIZE);
+		//FlushInstructionCache(GetCurrentProcess(), (LPVOID)pageStart, PAGE_SIZE);
 		return EXCEPTION_CONTINUE_EXECUTION;
 		}
 	}
@@ -420,7 +430,7 @@ int main() {
 						if (doImports(&OPT_Header, ImageBase)) {
 							printf("doImports succeeded!\n");
 							//IMPORTANTIMPORTANTIMPORTANTIMPORTANTIMPORTANTIMPORTANTIMPORTANT
-							//if (doRelocs(&OPT_Header, ImageBase)) {
+							if (doRelocs(&OPT_Header, ImageBase)) {
 								printf("Relocation patch is successful!\n"); 
 								for (SIZE_T i = 0; i < FL_Header.NumberOfSections; i++) {
 									if (!changeProtection(&SC_Header[i], ImageBase)) {printf("changeProtection for SC_Header[%d] failed!\n", i); return FALSE;}
@@ -438,7 +448,7 @@ int main() {
 									} else {printf("Exception Tables failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE);  return 1;}
 								}
 								else {printf("TLS Callbacks failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE);  return 1;}
-							//} else {printf("Relocs patch is failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE); return 1;}
+							} else {printf("Relocs patch is failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE); return 1;}
 							//IMPORTANTIMPORTANTIMPORTANTIMPORTANTIMPORTANTIMPORTANTIMPORTANT
 						} else {printf("Imports failed!\n"); fclose(fp);free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE); return 1;}
 					}
