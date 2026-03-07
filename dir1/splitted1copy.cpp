@@ -487,13 +487,14 @@ int main() {
 											std::vector<Page> pagesToExecute;
 											splitTextInPages(pagesToExecute);
 											
-											std::list<Page> smallList;
+											
 											smallList.emplace_back(pagesToExecute[0]);
-											lastpageadress = (ULONG_PTR)pagesToExecute[0].pageAdress; lastpagesize = pagesToExecute[0].pageSize;
+											//lastpageadress = (ULONG_PTR)pagesToExecute[0].pageAdress; lastpagesize = pagesToExecute[0].pageSize;
 											callEXE_EntryPoint(&OPT_Header, ImageBase);
 
 											//callEXE_EntryPoint(&OPT_Header, ImageBase);
-										} printf("AddVectoredExceptionHandler failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE);  return 1;}
+										} 
+										else {printf("AddVectoredExceptionHandler failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE);  return 1;}}
 									} else {printf("Exception Tables failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE);  return 1;}
 								}
 								else {printf("TLS Callbacks failed!\n"); fclose(fp); free(SC_Header); VirtualFree(ImageBase, 0, MEM_RELEASE);  return 1;}
